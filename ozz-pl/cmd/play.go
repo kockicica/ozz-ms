@@ -16,16 +16,7 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"runtime"
-	"time"
-
-	"ozz-ms/pkg/oto"
-
 	"github.com/spf13/cobra"
-	"github.com/tosone/minimp3"
 )
 
 // playCmd represents the play command
@@ -34,41 +25,7 @@ var playCmd = &cobra.Command{
 	Short: "Play audio file",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		f, err := os.Open("Z:\\documents\\My Music\\cistiliste\\Maya Jane Coles\\2021 - Maya Jane Coles - Night Creature\\03 - Maya Jane Coles - N31.mp3")
-		if err != nil {
-			return err
-		}
-
-		var dec *minimp3.Decoder
-		dec, err = minimp3.NewDecoder(f)
-		if err != nil {
-			return err
-		}
-
-		started := dec.Started()
-		<-started
-
-		log.Printf("Convert audio sample rate: %d, channels: %d\n", dec.SampleRate, dec.Channels)
-
-		var ctx *oto.Context
-		var r chan struct{}
-		ctx, r, err = oto.NewContextWithDevice(dec.SampleRate, dec.Channels, 2, 0)
-		if err != nil {
-			return err
-		}
-		<-r
-
-		p := ctx.NewPlayer(dec)
-		p.Play()
-		p.SetVolume(0.2)
-		up := p.UnplayedBufferSize()
-		for up > 0 {
-			time.Sleep(100 * time.Millisecond)
-			fmt.Println("Unplayed buffer size:", up)
-			up = p.UnplayedBufferSize()
-		}
-		p.Close()
-		runtime.KeepAlive(p)
+		cmd.Println("play called...")
 
 		return nil
 	},

@@ -16,11 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
-	"ozz-ms/pkg/oto"
-
-	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 )
 
@@ -29,16 +24,7 @@ var devicesCmd = &cobra.Command{
 	Short: "List existing audio devices",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		devices, err := oto.GetDevices()
-		if err != nil {
-			return err
-		}
-		table := uitable.New()
-		table.AddRow("ID", "NAME")
-		for _, d := range devices {
-			table.AddRow(d.Id, d.Name)
-		}
-		fmt.Println(table)
+		cmd.Println("devices called...")
 		return nil
 	},
 }
