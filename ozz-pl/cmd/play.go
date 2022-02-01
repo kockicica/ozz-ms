@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -157,6 +158,21 @@ func (p *AudioPlayer) PlayMediaFromPath(path string) error {
 	return nil
 }
 
+func (p *AudioPlayer) PlayMediaFromURL(url string) error {
+	var err error
+	p.media, err = p.vlcPlayer.LoadMediaFromURL(url)
+	if err != nil {
+		return err
+	}
+
+	err = p.vlcPlayer.Play()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (p *AudioPlayer) SetVolume(volume int) error {
 	return p.vlcPlayer.SetVolume(volume)
 }
@@ -182,7 +198,15 @@ var playCmd = &cobra.Command{
 			return err
 		}
 
-		err = pl.PlayMediaFromPath(args[0])
+		mediaUrl, err := url.Parse(args[0])
+		if err != nil {
+			return err
+		}
+		if mediaUrl.Scheme == "http" || mediaUrl.Scheme == "https" {
+			err = pl.PlayMediaFromURL(mediaUrl.String())
+		} else {
+			err = pl.PlayMediaFromPath(args[0])
+		}
 		if err != nil {
 			return err
 		}
