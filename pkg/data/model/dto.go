@@ -50,3 +50,17 @@ type ScheduleDTO struct {
 	Active                         bool
 	TotalPlayCount                 int
 }
+
+type AudioRecordingsSearchParams struct {
+	Category *int    `query:"category" validate:"int"`
+	FromDate *string `validate:"date" query:"fromDate"`
+	ToDate   *string `validate:"date" query:"toDate"`
+}
+
+type ScheduleSearchParams struct {
+	Recording *int `validate:"int" query:"recording"`
+	//Category  *int    `validate:"int" query:"category"`
+	Active   *bool   `validate:"bool" query:"active"`
+	FromDate *string `validate:"date" query:"fromDate"`
+	ToDate   *string `validate:"date" query:"toDate"`
+}

@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"ozz-ms/pkg/data/model"
-	"ozz-ms/pkg/data/repository"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -13,7 +12,7 @@ import (
 
 func (s *Server) searchSchedules(ctx echo.Context) error {
 	var err error
-	ssp := repository.ScheduleSearchParams{}
+	ssp := model.ScheduleSearchParams{}
 
 	err = ctx.Bind(&ssp)
 	if err != nil {

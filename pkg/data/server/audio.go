@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"ozz-ms/pkg/data/model"
-	"ozz-ms/pkg/data/repository"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -15,7 +14,7 @@ import (
 func (s *Server) searchAudioRecords(ctx echo.Context) error {
 
 	var err error
-	var sp repository.AudioRecordingsSearchParams
+	var sp model.AudioRecordingsSearchParams
 	if err = ctx.Bind(&sp); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
