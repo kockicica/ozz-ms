@@ -52,3 +52,7 @@ func (r Repository) DeleteAudioRecording(id int, data interface{}) error {
 	}
 	return nil
 }
+
+func (r Repository) AudioRecording(id int, data interface{}) error {
+	return r.db.Model(&model.AudioRecording{}).First(data, id).Error
+}
