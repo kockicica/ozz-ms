@@ -117,6 +117,7 @@ func NewDataServer(config ServerConfig) (*Server, error) {
 	scheduleGroup.PUT("/:id", ds.updateSchedule)
 	scheduleGroup.DELETE("/:id", ds.deleteSchedule)
 	scheduleGroup.POST("", ds.createSchedule)
+	scheduleGroup.POST("/multiple", ds.createMultipleSchedules)
 
 	apiGroup.GET("/shifts", ds.getShifts)
 	apiGroup.POST("/authorize", ds.authorize)

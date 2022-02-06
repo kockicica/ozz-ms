@@ -84,6 +84,30 @@ func (s *Server) createSchedule(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, sch.Map())
 }
 
+func (s *Server) createMultipleSchedules(ctx echo.Context) error {
+	var err error
+
+	data := []model.NewScheduleDTO{}
+
+	if err = ctx.Bind(&data); err != nil {
+		return err
+	}
+
+	results := []model.ScheduleDTO{}
+	for _, sdto := range data {
+		if err = ctx.Validate(&sdto); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		sch, err := s.repo.NewSchedule(sdto)
+		if err != nil {
+			return err
+		}
+		results = append(results, sch.Map())
+	}
+
+	return ctx.JSON(http.StatusOK, results)
+}
+
 func (s *Server) deleteSchedule(ctx echo.Context) error {
 
 	var (
