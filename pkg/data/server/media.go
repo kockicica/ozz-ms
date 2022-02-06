@@ -24,7 +24,7 @@ type AudioRecordingCreateData struct {
 	File     *multipart.FileHeader `form:"file" validate:"required"`
 }
 
-func (s *Server) uploadAudioTrack(ctx echo.Context) error {
+func (s *Server) createAudioRecord(ctx echo.Context) error {
 
 	var err error
 
