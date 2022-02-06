@@ -109,8 +109,8 @@ to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		cfg := server.ServerConfig{
-			Dsn: "data.db?_pragma=foreign_keys(1)",
-			//Dsn:      "root:pass@tcp(localhost:3306)/ozz?charset=utf8mb4&parseTime=True&loc=Local",
+			Dsn: "data.db",
+			//Dsn:      "mysql://root:pass@localhost:3306/ozz?charset=utf8mb4&parseTime=True&loc=Local",
 			Port:     27000,
 			RootPath: "./media",
 			Verbose:  true,

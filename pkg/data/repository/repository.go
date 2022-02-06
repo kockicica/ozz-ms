@@ -2,7 +2,9 @@ package repository
 
 import (
 	"fmt"
-	"strings"
+	"net/url"
+	"os"
+	"path/filepath"
 
 	"ozz-ms/pkg/data/model"
 
@@ -26,21 +28,13 @@ func NewRepository(cfg RepositoryConfig) (*Repository, error) {
 
 	var err error
 	var db *gorm.DB
-	var dialect gorm.Dialector
 
-	dsnParts := strings.Split(cfg.Dsn, ":")
-	if len(dsnParts) == 2 {
-		// db + dsn
-		dialect, err = createDialector(dsnParts[0], dsnParts[1])
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		dialect, err = createDialector("sqlite", cfg.Dsn)
-		if err != nil {
-			return nil, err
-		}
+	u, err := url.Parse(cfg.Dsn)
+	if err != nil {
+		return nil, err
 	}
+
+	dialect, err := createDialector(u)
 
 	repo := new(Repository)
 
@@ -196,13 +190,39 @@ func initUsers(db *gorm.DB) error {
 	return nil
 }
 
-func createDialector(db, dsn string) (gorm.Dialector, error) {
-	switch db {
-	case "sqlite":
-		return sqlite.Open(dsn), nil
+func createDialector(dbUrl *url.URL) (gorm.Dialector, error) {
+
+	switch dbUrl.Scheme {
 	case "mysql":
-		return mysql.Open(dsn), nil
+		if dbUrl.User == nil {
+			return nil, fmt.Errorf("there is no mssql authentication data")
+		}
+		pass, passOk := dbUrl.User.Password()
+		if !passOk {
+			return nil, fmt.Errorf("there is no mssql password supplied")
+		}
+
+		cn := fmt.Sprintf("%s:%s@tcp(%s)%s", dbUrl.User.Username(), pass, dbUrl.Host, dbUrl.Path)
+		if dbUrl.RawQuery != "" {
+			cn += fmt.Sprintf("?%s", dbUrl.RawQuery)
+		}
+		return mysql.Open(cn), nil
+	case "sqlite":
+		fallthrough
 	default:
-		return nil, fmt.Errorf("unable to find gorm dialector for db: %s", db)
+		cn := filepath.Join(dbUrl.Host, dbUrl.Path)
+		absPath, err := filepath.Abs(cn)
+		if err != nil {
+			return nil, err
+		}
+		dir, _ := filepath.Split(absPath)
+		if err = os.MkdirAll(dir, os.ModeDir); err != nil {
+			return nil, err
+		}
+		absPath += "?_pragma=foreign_keys(1)"
+		if dbUrl.RawQuery != "" {
+			absPath += fmt.Sprintf("&%s", dbUrl.RawQuery)
+		}
+		return sqlite.Open(absPath), nil
 	}
 }
