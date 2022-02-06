@@ -1,8 +1,11 @@
-package data
+package server
 
 import (
 	"errors"
 	"net/http"
+
+	"ozz-ms/pkg/data/model"
+	"ozz-ms/pkg/data/repository"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -10,7 +13,7 @@ import (
 
 func (s *Server) searchSchedules(ctx echo.Context) error {
 	var err error
-	ssp := ScheduleSearchParams{}
+	ssp := repository.ScheduleSearchParams{}
 
 	err = ctx.Bind(&ssp)
 	if err != nil {
@@ -21,12 +24,12 @@ func (s *Server) searchSchedules(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	var data []Schedule
+	var data []model.Schedule
 	if err := s.repo.Schedules(ssp, &data); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	ret := []ScheduleDTO{}
+	ret := []model.ScheduleDTO{}
 
 	for _, sch := range data {
 		ret = append(ret, sch.Map())
@@ -49,7 +52,7 @@ func (s *Server) getSchedule(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	sch := Schedule{}
+	sch := model.Schedule{}
 	if err := s.repo.Schedule(id, &sch); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
@@ -65,7 +68,7 @@ func (s *Server) createSchedule(ctx echo.Context) error {
 
 	var err error
 
-	data := NewScheduleDTO{}
+	data := model.NewScheduleDTO{}
 	if err = ctx.Bind(&data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
@@ -111,7 +114,7 @@ func (s *Server) updateSchedule(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	dto := NewScheduleDTO{}
+	dto := model.NewScheduleDTO{}
 	if err := ctx.Bind(&dto); err != nil {
 		return err
 	}
@@ -123,7 +126,7 @@ func (s *Server) updateSchedule(ctx echo.Context) error {
 		return err
 	}
 
-	sch := Schedule{}
+	sch := model.Schedule{}
 	if err := s.repo.Schedule(id, &sch); err != nil {
 		return err
 	}

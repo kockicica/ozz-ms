@@ -1,9 +1,12 @@
-package data
+package server
 
 import (
 	"errors"
 	"net/http"
 	"strconv"
+
+	"ozz-ms/pkg/data/model"
+	"ozz-ms/pkg/data/repository"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -12,7 +15,7 @@ import (
 func (s *Server) searchAudioRecords(ctx echo.Context) error {
 
 	var err error
-	var sp AudioRecordingsSearchParams
+	var sp repository.AudioRecordingsSearchParams
 	if err = ctx.Bind(&sp); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -21,16 +24,16 @@ func (s *Server) searchAudioRecords(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	var data []AudioRecording
+	var data []model.AudioRecording
 
 	if err = s.repo.AudioRecordings(sp, &data); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	ret := []AudioRecordingDTO{}
+	ret := []model.AudioRecordingDTO{}
 
 	for _, ar := range data {
-		ret = append(ret, AudioRecordingDTO{
+		ret = append(ret, model.AudioRecordingDTO{
 			ID:       ar.ID,
 			Name:     ar.Name,
 			Path:     ar.Path,
@@ -55,7 +58,7 @@ func (s *Server) deleteAudioRecord(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ar := AudioRecording{}
+	ar := model.AudioRecording{}
 	if err := s.repo.DeleteAudioRecording(id, &ar); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())

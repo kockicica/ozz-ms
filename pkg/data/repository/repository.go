@@ -1,8 +1,11 @@
-package data
+package repository
 
 import (
 	"errors"
 	"time"
+
+	"ozz-ms/pkg/data/model"
+	"ozz-ms/pkg/util"
 
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
@@ -15,14 +18,14 @@ type Repository struct {
 
 func (r Repository) Authorize(username, password string, data interface{}) error {
 
-	if err := r.db.Model(&User{}).Where(&User{Username: username}).First(data).Error; err != nil {
+	if err := r.db.Model(&model.User{}).Where(&model.User{Username: username}).First(data).Error; err != nil {
 		return err
 	}
 	return nil
 }
 func (r Repository) Shifts(data interface{}) error {
 
-	if err := r.db.Model(&Shift{}).Order("`order`").Find(data).Error; err != nil {
+	if err := r.db.Model(&model.Shift{}).Order("`order`").Find(data).Error; err != nil {
 		return err
 	}
 
@@ -31,26 +34,26 @@ func (r Repository) Shifts(data interface{}) error {
 
 func (r Repository) Categories(data interface{}) error {
 
-	if err := r.db.Model(&Category{}).Order("`order`").Find(data).Error; err != nil {
+	if err := r.db.Model(&model.Category{}).Order("`order`").Find(data).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r Repository) CategoryByName(name string) (*Category, error) {
-	var cat = new(Category)
-	if err := r.db.Where(&Category{Name: name}).Find(cat).Error; err != nil {
+func (r Repository) CategoryByName(name string) (*model.Category, error) {
+	var cat = new(model.Category)
+	if err := r.db.Where(&model.Category{Name: name}).Find(cat).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// not found, make default
-			return &Category{Name: "DEFAULT", Path: "default"}, nil
+			return &model.Category{Name: "DEFAULT", Path: "default"}, nil
 		}
 		return nil, err
 	}
 	return cat, nil
 }
 
-func (r Repository) NewAudioRecording(rec *AudioRecording) error {
+func (r Repository) NewAudioRecording(rec *model.AudioRecording) error {
 	if err := r.db.Create(rec).Error; err != nil {
 		return err
 	}
@@ -74,7 +77,7 @@ func (r Repository) Schedules(sp ScheduleSearchParams, data interface{}) error {
 	//	tx = tx.Where(&Schedule{Recording: AudioRecording{CategoryID: *sp.Category}})
 	//}
 	if sp.Recording != nil {
-		tx = tx.Where(&Schedule{RecordingID: *sp.Recording})
+		tx = tx.Where(&model.Schedule{RecordingID: *sp.Recording})
 	}
 	if sp.Active != nil {
 		tx = tx.Where("Active", *sp.Active)
@@ -106,7 +109,7 @@ func (r Repository) Schedule(id int, data interface{}) error {
 }
 
 func (r Repository) DeleteSchedule(id []int) error {
-	tx := r.db.Delete(&Schedule{}, id)
+	tx := r.db.Delete(&model.Schedule{}, id)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -117,16 +120,16 @@ func (r Repository) DeleteSchedule(id []int) error {
 
 }
 
-func (r Repository) SetSchedule(id int, data NewScheduleDTO) error {
+func (r Repository) SetSchedule(id int, data model.NewScheduleDTO) error {
 
-	sch := &Schedule{}
+	sch := &model.Schedule{}
 
 	tx := r.db.Preload("Recording").First(&sch, id)
 	if tx.Error != nil {
 		return tx.Error
 	}
 
-	scheduleDate, err := parseDateString(data.Date)
+	scheduleDate, err := util.ParseDateString(data.Date)
 	if err != nil {
 		return err
 	}
@@ -154,7 +157,7 @@ type AudioRecordingsSearchParams struct {
 }
 
 func (r Repository) AudioRecordings(sp AudioRecordingsSearchParams, data interface{}) error {
-	tx := r.db.Preload("Category").Model(&AudioRecording{})
+	tx := r.db.Preload("Category").Model(&model.AudioRecording{})
 
 	if sp.Category != nil {
 		tx = tx.Where("Category.id", *sp.Category)
@@ -183,17 +186,17 @@ func (r Repository) AudioRecordings(sp AudioRecordingsSearchParams, data interfa
 
 func (r Repository) DeleteAudioRecording(id int, data interface{}) error {
 
-	if err := r.db.Model(&AudioRecording{}).First(data, id).Error; err != nil {
+	if err := r.db.Model(&model.AudioRecording{}).First(data, id).Error; err != nil {
 		return err
 	}
 
-	if err := r.db.Delete(&AudioRecording{}, id).Error; err != nil {
+	if err := r.db.Delete(&model.AudioRecording{}, id).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r Repository) NewSchedule(dto NewScheduleDTO) (*Schedule, error) {
+func (r Repository) NewSchedule(dto model.NewScheduleDTO) (*model.Schedule, error) {
 
 	//d, err := time.ParseDuration(dto.Duration)
 	//if err != nil {
@@ -206,12 +209,12 @@ func (r Repository) NewSchedule(dto NewScheduleDTO) (*Schedule, error) {
 	}
 
 	// find
-	rec := AudioRecording{}
+	rec := model.AudioRecording{}
 	if err := r.db.First(&rec, dto.Recording).Error; err != nil {
 		return nil, err
 	}
 
-	sch := Schedule{
+	sch := model.Schedule{
 		Duration:       rec.Duration,
 		Shift1:         dto.Shift1,
 		Shift2:         dto.Shift2,
@@ -235,11 +238,11 @@ func (r Repository) NewSchedule(dto NewScheduleDTO) (*Schedule, error) {
 
 }
 
-func (r Repository) CreateDispositions(items []Schedule) ([]Disposition, error) {
+func (r Repository) CreateDispositions(items []model.Schedule) ([]model.Disposition, error) {
 
 	for _, sch := range items {
-		var disp Disposition
-		disp = Disposition{
+		var disp model.Disposition
+		disp = model.Disposition{
 			PlayCountCurrent: 0,
 			PlayCountNeeded:  sch.Shift1,
 		}
@@ -249,22 +252,12 @@ func (r Repository) CreateDispositions(items []Schedule) ([]Disposition, error) 
 	return nil, nil
 }
 
-func NewRepository(dsn string) (*Repository, error) {
-
-	var err error
-	repo := new(Repository)
-	repo.db, err = newSQLiteRepository(dsn)
-	if err != nil {
-		return nil, err
-	}
-	return repo, nil
-
-}
-
-func newSQLiteRepository(dsn string) (*gorm.DB, error) {
+func NewSQLiteRepository(dsn string) (*Repository, error) {
 
 	var err error
 	var db *gorm.DB
+
+	repo := new(Repository)
 
 	db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
@@ -276,13 +269,13 @@ func newSQLiteRepository(dsn string) (*gorm.DB, error) {
 	}
 
 	models := []interface{}{
-		&Shift{},
-		&Category{},
-		&AudioRecording{},
-		&Disposition{},
-		&DispositionPlayed{},
-		&User{},
-		&Schedule{},
+		&model.Shift{},
+		&model.Category{},
+		&model.AudioRecording{},
+		&model.Disposition{},
+		&model.DispositionPlayed{},
+		&model.User{},
+		&model.Schedule{},
 	}
 
 	if err = db.AutoMigrate(models...); err != nil {
@@ -300,19 +293,21 @@ func newSQLiteRepository(dsn string) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	return db, nil
+	repo.db = db
+
+	return repo, nil
 
 }
 
 func initCategories(db *gorm.DB) error {
 	var count int64
-	if err := db.Model(&Category{}).Count(&count).Error; err != nil {
+	if err := db.Model(&model.Category{}).Count(&count).Error; err != nil {
 		return err
 	}
 	if count != 0 {
 		return nil
 	}
-	var predefinedCategories = []Category{
+	var predefinedCategories = []model.Category{
 		{
 			Name:  "REKLAME",
 			Path:  "reklame",
@@ -355,14 +350,14 @@ func initCategories(db *gorm.DB) error {
 
 func initShifts(db *gorm.DB) error {
 	var count int64
-	if err := db.Model(&Shift{}).Count(&count).Error; err != nil {
+	if err := db.Model(&model.Shift{}).Count(&count).Error; err != nil {
 		return err
 	}
 	if count != 0 {
 		return nil
 	}
 
-	predefinedShifts := []Shift{
+	predefinedShifts := []model.Shift{
 		{Name: "Smena I", Active: true, Order: 2},
 		{Name: "Smena II", Active: true, Order: 3},
 		{Name: "Smena III", Active: true, Order: 4},
@@ -380,18 +375,18 @@ func initShifts(db *gorm.DB) error {
 
 func initUsers(db *gorm.DB) error {
 	var count int64
-	if err := db.Model(&User{}).Count(&count).Error; err != nil {
+	if err := db.Model(&model.User{}).Count(&count).Error; err != nil {
 		return err
 	}
 	if count != 0 {
 		return nil
 	}
 
-	predefinedUsers := []User{
-		{Username: "maki", Password: "maki", Level: Admin},
-		{Username: "taki", Password: "taki", Level: Regular},
-		{Username: "laki", Password: "laki", Level: Regular},
-		{Username: "caki", Password: "caki", Level: Regular},
+	predefinedUsers := []model.User{
+		{Username: "maki", Password: "maki", Level: model.Admin},
+		{Username: "taki", Password: "taki", Level: model.Regular},
+		{Username: "laki", Password: "laki", Level: model.Regular},
+		{Username: "caki", Password: "caki", Level: model.Regular},
 	}
 
 	for _, u := range predefinedUsers {

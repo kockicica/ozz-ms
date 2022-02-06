@@ -1,4 +1,4 @@
-package data
+package server
 
 import (
 	"context"
@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	"ozz-ms/pkg/data/repository"
 
 	"github.com/gookit/validate"
 	"github.com/labstack/echo/v4"
@@ -55,20 +57,18 @@ type Server struct {
 	Config ServerConfig
 	es     *echo.Echo
 	//db     *gorm.DB
-	repo *Repository
+	repo *repository.Repository
 }
 
 func (s *Server) Start() error {
 	var err error
 
-	db, err := newSQLiteRepository(s.Config.Dsn)
+	r, err := repository.NewSQLiteRepository(s.Config.Dsn)
 	if err != nil {
 		return err
 	}
 
-	s.repo = &Repository{
-		db: db,
-	}
+	s.repo = r
 
 	err = s.es.Start(fmt.Sprintf(":%d", s.Config.Port))
 	if err != nil {

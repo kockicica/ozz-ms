@@ -1,7 +1,9 @@
-package data
+package server
 
 import (
 	"net/http"
+
+	"ozz-ms/pkg/data/model"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -25,7 +27,7 @@ func (s *Server) getShifts(ctx echo.Context) error {
 
 func (s *Server) getCategories(ctx echo.Context) error {
 
-	var cats []CategoryDTO
+	var cats []model.CategoryDTO
 
 	if err := s.repo.Categories(&cats); err != nil {
 		return err

@@ -1,4 +1,4 @@
-package data
+package server
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"ozz-ms/pkg/data/model"
 
 	"github.com/labstack/echo/v4"
 )
@@ -87,7 +89,7 @@ func (s *Server) uploadAudioTrack(ctx echo.Context) error {
 		_ = os.Remove(destinationFileName)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	ar := AudioRecording{
+	ar := model.AudioRecording{
 		Name:     name,
 		Category: *cat,
 		Client:   &client,
@@ -102,7 +104,7 @@ func (s *Server) uploadAudioTrack(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return ctx.JSON(http.StatusCreated, AudioRecordingDTO{
+	return ctx.JSON(http.StatusCreated, model.AudioRecordingDTO{
 		ID:       ar.ID,
 		Name:     ar.Name,
 		Category: ar.Category.Name,

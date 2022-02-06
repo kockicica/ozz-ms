@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"ozz-ms/pkg/data"
+	"ozz-ms/pkg/data/server"
 
 	"github.com/kardianos/service"
 	"github.com/spf13/cobra"
@@ -45,7 +45,7 @@ var runner *serverWrapper
 
 type serverWrapper struct {
 	service service.Service
-	server  *data.Server
+	server  *server.Server
 	exit    chan os.Signal
 	logger  service.Logger
 }
@@ -108,14 +108,14 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		cfg := data.ServerConfig{
+		cfg := server.ServerConfig{
 			Dsn: "data.db?_pragma=foreign_keys(1)",
 			//Dsn:      "root:pass@tcp(localhost:3306)/ozz?charset=utf8mb4&parseTime=True&loc=Local",
 			Port:     27000,
 			RootPath: "./media",
 		}
 
-		srv, err := data.NewDataServer(cfg)
+		srv, err := server.NewDataServer(cfg)
 
 		if err != nil {
 			return err
