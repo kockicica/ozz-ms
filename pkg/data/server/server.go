@@ -63,7 +63,11 @@ type Server struct {
 func (s *Server) Start() error {
 	var err error
 
-	r, err := repository.NewSQLiteRepository(s.Config.Dsn)
+	repoCfg := repository.RepositoryConfig{
+		Dsn:     s.Config.Dsn,
+		Verbose: s.Config.Verbose,
+	}
+	r, err := repository.NewRepository(repoCfg)
 	if err != nil {
 		return err
 	}

@@ -1,28 +1,62 @@
 package repository
 
 import (
+	"fmt"
+	"strings"
+
 	"ozz-ms/pkg/data/model"
 
 	"github.com/glebarez/sqlite"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 type Repository struct {
 	db *gorm.DB
 }
 
-func NewSQLiteRepository(dsn string) (*Repository, error) {
+type RepositoryConfig struct {
+	Dsn     string
+	Verbose bool
+	Logger  gormlogger.Interface
+}
+
+func NewRepository(cfg RepositoryConfig) (*Repository, error) {
 
 	var err error
 	var db *gorm.DB
+	var dialect gorm.Dialector
+
+	dsnParts := strings.Split(cfg.Dsn, ":")
+	if len(dsnParts) == 2 {
+		// db + dsn
+		dialect, err = createDialector(dsnParts[0], dsnParts[1])
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		dialect, err = createDialector("sqlite", cfg.Dsn)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	repo := new(Repository)
 
-	db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-		//SkipDefaultTransaction: true,
-	})
+	gormCfg := gorm.Config{}
+	if cfg.Logger != nil {
+		gormCfg.Logger = cfg.Logger
+	} else {
+		gormCfg.Logger = gormlogger.Default
+	}
+
+	if cfg.Verbose {
+		gormCfg.Logger = gormCfg.Logger.LogMode(gormlogger.Info)
+	}
+
+	db, err = gorm.Open(dialect, &gormCfg)
+
 	//db, err = gorm.Open(mysql.Open(dsn))
 	if err != nil {
 		return nil, err
@@ -45,6 +79,7 @@ func NewSQLiteRepository(dsn string) (*Repository, error) {
 	if err = initCategories(db); err != nil {
 		return nil, err
 	}
+
 	if err = initShifts(db); err != nil {
 		return nil, err
 	}
@@ -159,4 +194,15 @@ func initUsers(db *gorm.DB) error {
 	}
 
 	return nil
+}
+
+func createDialector(db, dsn string) (gorm.Dialector, error) {
+	switch db {
+	case "sqlite":
+		return sqlite.Open(dsn), nil
+	case "mysql":
+		return mysql.Open(dsn), nil
+	default:
+		return nil, fmt.Errorf("unable to find gorm dialector for db: %s", db)
+	}
 }

@@ -113,6 +113,7 @@ to quickly create a Cobra application.`,
 			//Dsn:      "root:pass@tcp(localhost:3306)/ozz?charset=utf8mb4&parseTime=True&loc=Local",
 			Port:     27000,
 			RootPath: "./media",
+			Verbose:  true,
 		}
 
 		srv, err := server.NewDataServer(cfg)
