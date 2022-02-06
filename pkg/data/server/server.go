@@ -119,6 +119,11 @@ func NewDataServer(config ServerConfig) (*Server, error) {
 	scheduleGroup.POST("", ds.createSchedule)
 	scheduleGroup.POST("/multiple", ds.createMultipleSchedules)
 
+	dispositionGroup := apiGroup.Group("/dispositions")
+	dispositionGroup.GET("", ds.searchDispositions)
+	dispositionGroup.POST("/create", ds.createDispositions)
+	dispositionGroup.POST("/:id/increase", ds.increaseDispositionPlayedCount)
+
 	apiGroup.GET("/shifts", ds.getShifts)
 	apiGroup.POST("/authorize", ds.authorize)
 	apiGroup.GET("/categories", ds.getCategories)

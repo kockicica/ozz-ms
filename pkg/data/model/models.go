@@ -51,6 +51,17 @@ type AudioRecording struct {
 	Date       time.Time
 }
 
+func (r AudioRecording) Map() AudioRecordingDTO {
+	return AudioRecordingDTO{
+		ID:       r.ID,
+		Name:     r.Name,
+		Path:     r.Path,
+		Category: r.Category.Name,
+		Duration: r.Duration,
+		Date:     r.Date,
+	}
+}
+
 type Disposition struct {
 	gorm.Model
 	Date             time.Time `validate:"required"`
@@ -59,6 +70,21 @@ type Disposition struct {
 	Recording        AudioRecording
 	PlayCountNeeded  int `validate:"required|int|min:1|max:1000"`
 	PlayCountCurrent int `validate:"required|int|min:1|max:1000"`
+	ScheduleID       int
+	Schedule         Schedule
+}
+
+func (d *Disposition) Map() DispositionDTO {
+	dto := DispositionDTO{
+		AudioRecordingDTO: d.Recording.Map(),
+		Date:              d.Date,
+		Shift:             d.Shift,
+		PlayCountNeeded:   d.PlayCountNeeded,
+		PlayCountCurrent:  d.PlayCountCurrent,
+	}
+	dto.ID = d.ID
+	dto.Date = d.Date
+	return dto
 }
 
 type DispositionPlayed struct {
@@ -106,11 +132,13 @@ type Schedule struct {
 
 	Active         bool
 	TotalPlayCount int
+
+	Dispositions []Disposition
 }
 
 func (s Schedule) Map() ScheduleDTO {
 
-	return ScheduleDTO{
+	dto := ScheduleDTO{
 		ID: s.ID,
 		Recording: AudioRecordingDTO{
 			ID:       s.Recording.ID,
@@ -128,6 +156,13 @@ func (s Schedule) Map() ScheduleDTO {
 		Shift4:         s.Shift4,
 		Active:         s.Active,
 		TotalPlayCount: s.TotalPlayCount,
+		Dispositions:   []DispositionDTO{},
 	}
+
+	for _, dsp := range s.Dispositions {
+		dto.Dispositions = append(dto.Dispositions, dsp.Map())
+	}
+
+	return dto
 
 }

@@ -12,7 +12,7 @@ import (
 func (r Repository) Schedules(sp model.ScheduleSearchParams, data interface{}) error {
 	var err error
 
-	tx := r.db.Preload("Recording").Preload("Recording.Category")
+	tx := r.db.Preload("Recording").Preload("Recording.Category").Preload("Dispositions").Preload("Dispositions.Recording").Preload("Dispositions.Recording.Category")
 
 	//if sp.Category != nil {
 	//	tx = tx.Where(&Schedule{Recording: AudioRecording{CategoryID: *sp.Category}})
@@ -46,7 +46,7 @@ func (r Repository) Schedules(sp model.ScheduleSearchParams, data interface{}) e
 }
 
 func (r Repository) Schedule(id int, data interface{}) error {
-	return r.db.Preload("Recording").Preload("Recording.Category").First(data, id).Error
+	return r.db.Preload("Recording").Preload("Recording.Category").Preload("Dispositions").First(data, id).Error
 }
 
 func (r Repository) DeleteSchedule(id []int) error {
@@ -131,4 +131,9 @@ func (r Repository) NewSchedule(dto model.NewScheduleDTO) (*model.Schedule, erro
 
 	return &sch, nil
 
+}
+
+func (r Repository) ActiveSchedules(data interface{}) error {
+	act := true
+	return r.Schedules(model.ScheduleSearchParams{Active: &act}, data)
 }

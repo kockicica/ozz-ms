@@ -20,7 +20,7 @@ type AudioRecordingDTO struct {
 	Date     time.Time
 }
 
-type DispositionItemDTO struct {
+type DispositionDTO struct {
 	AudioRecordingDTO
 	Date             time.Time
 	Shift            int
@@ -49,6 +49,7 @@ type ScheduleDTO struct {
 	Shift1, Shift2, Shift3, Shift4 int
 	Active                         bool
 	TotalPlayCount                 int
+	Dispositions                   []DispositionDTO
 }
 
 type AudioRecordingsSearchParams struct {
