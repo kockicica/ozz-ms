@@ -123,6 +123,7 @@ func NewDataServer(config ServerConfig) (*Server, error) {
 	dispositionGroup.GET("", ds.searchDispositions)
 	dispositionGroup.POST("/create", ds.createDispositions)
 	dispositionGroup.POST("/:id/increase", ds.increaseDispositionPlayedCount)
+	dispositionGroup.POST("/:id/decrease", ds.decreaseDispositionPlayedCount)
 
 	apiGroup.GET("/shifts", ds.getShifts)
 	apiGroup.POST("/authorize", ds.authorize)

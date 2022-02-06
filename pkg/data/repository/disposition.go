@@ -95,7 +95,7 @@ func (r Repository) ChangePlayCountForDisposition(id int, time time.Time, delta 
 	tmp := model.Disposition{}
 
 	if erro := r.db.Transaction(func(tx *gorm.DB) error {
-		if err := r.db.Preload("Recording").First(&tmp, id).Error; err != nil {
+		if err := tx.Preload("Recording").First(&tmp, id).Error; err != nil {
 			return err
 		}
 		if delta > 0 {
@@ -107,7 +107,7 @@ func (r Repository) ChangePlayCountForDisposition(id int, time time.Time, delta 
 				tmp.PlayCountCurrent += delta
 			}
 		}
-		if err := r.db.Updates(&tmp).Error; err != nil {
+		if err := tx.Select("PlayCountCurrent").Updates(&tmp).Error; err != nil {
 			return err
 		}
 

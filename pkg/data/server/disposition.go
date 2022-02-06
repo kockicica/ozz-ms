@@ -65,3 +65,23 @@ func (s *Server) increaseDispositionPlayedCount(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, dsp.Map())
 }
+
+func (s *Server) decreaseDispositionPlayedCount(ctx echo.Context) error {
+
+	var id int
+	if err := echo.PathParamsBinder(ctx).Int("id", &id).BindError(); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	time := time.Now()
+
+	dsp, err := s.repo.ChangePlayCountForDisposition(id, time, -1)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return err
+	}
+
+	return ctx.JSON(http.StatusOK, dsp.Map())
+}

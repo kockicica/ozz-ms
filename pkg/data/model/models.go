@@ -81,6 +81,7 @@ func (d *Disposition) Map() DispositionDTO {
 		Shift:             d.Shift,
 		PlayCountNeeded:   d.PlayCountNeeded,
 		PlayCountCurrent:  d.PlayCountCurrent,
+		RecordingID:       d.RecordingID,
 	}
 	dto.ID = d.ID
 	dto.Date = d.Date

@@ -26,6 +26,7 @@ type DispositionDTO struct {
 	Shift            int
 	PlayCountNeeded  int
 	PlayCountCurrent int
+	RecordingID      int
 }
 
 type NewScheduleDTO struct {
