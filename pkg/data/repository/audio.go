@@ -17,7 +17,8 @@ func (r Repository) AudioRecordings(sp model.AudioRecordingsSearchParams, data i
 	tx := r.db.Preload("Category").Model(&model.AudioRecording{})
 
 	if sp.Category != nil {
-		tx = tx.Where("Category.id", *sp.Category)
+		//tx = tx.Where("CategoryID", *sp.Category)
+		tx = tx.Where(&model.AudioRecording{CategoryID: *sp.Category})
 	}
 
 	if sp.FromDate != nil {
