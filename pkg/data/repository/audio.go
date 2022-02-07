@@ -57,3 +57,20 @@ func (r Repository) DeleteAudioRecording(id int, data interface{}) error {
 func (r Repository) AudioRecording(id int, data interface{}) error {
 	return r.db.Model(&model.AudioRecording{}).First(data, id).Error
 }
+
+func (r Repository) ActiveAudioRecordingsForCategory(catId int, data interface{}) error {
+
+	//tx := r.db.Model(&model.Schedule{}).Preload("Recording").Preload("Recording.Category")
+	//tx = tx.Where(&model.Schedule{Active: true})
+	tx := r.db.Model(&model.AudioRecording{}).
+		Select("distinct Audio_Recordings.*, Categories.name as Category__name, Categories.id as Category__id, Categories.`Order` as Category__order").
+		Joins("join Categories on Categories.Id = Audio_Recordings.Category_ID").
+		Joins("left outer join Schedules on Schedules.Recording_id = Audio_Recordings.Id and Schedules.active = ?", true).
+		Where("Categories.Id = ?", catId)
+
+	if err := tx.Find(data).Error; err != nil {
+		return err
+	}
+
+	return nil
+}

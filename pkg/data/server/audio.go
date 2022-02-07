@@ -203,3 +203,23 @@ func (s *Server) getAudioRecordingPath(name, category string) string {
 
 	return filepath.Join(s.Config.RootPath, category, fmt.Sprintf("%s-%s%s", fileNameWoutExt, cd, ext))
 }
+
+func (s *Server) getActiveAudioRecordingsForCategory(ctx echo.Context) error {
+
+	var id int
+	if err := echo.PathParamsBinder(ctx).Int("id", &id).BindError(); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	data := []model.AudioRecording{}
+	if err := s.repo.ActiveAudioRecordingsForCategory(id, &data); err != nil {
+		return err
+	}
+
+	res := []model.AudioRecordingDTO{}
+	for _, ar := range data {
+		res = append(res, ar.Map())
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
