@@ -204,15 +204,23 @@ func (s *Server) getAudioRecordingPath(name, category string) string {
 	return filepath.Join(s.Config.RootPath, category, fmt.Sprintf("%s-%s%s", fileNameWoutExt, cd, ext))
 }
 
+type ActiveAudioRecordsForCategorySearchParams struct {
+	Id   int    `validate:"required|int" param:"id"`
+	Name string `query:"name"`
+}
+
 func (s *Server) getActiveAudioRecordingsForCategory(ctx echo.Context) error {
 
-	var id int
-	if err := echo.PathParamsBinder(ctx).Int("id", &id).BindError(); err != nil {
+	var err error
+
+	sp := ActiveAudioRecordsForCategorySearchParams{}
+
+	if err := ctx.Bind(&sp); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	data := []model.AudioRecording{}
-	if err := s.repo.ActiveAudioRecordingsForCategory(id, &data); err != nil {
+	if err = s.repo.ActiveAudioRecordingsForCategory(sp.Id, sp.Name, &data); err != nil {
 		return err
 	}
 
