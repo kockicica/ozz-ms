@@ -167,3 +167,28 @@ func (s Schedule) Map() ScheduleDTO {
 	return dto
 
 }
+
+type Equalizer struct {
+	gorm.Model
+	Name                                                        string `gorm:"unique"`
+	PreAmp                                                      float32
+	Amp1, Amp2, Amp3, Amp4, Amp5, Amp6, Amp7, Amp8, Amp9, Amp10 float32
+}
+
+func (e Equalizer) Map() EqualizerDTO {
+	return EqualizerDTO{
+		ID:     e.ID,
+		Name:   e.Name,
+		PreAmp: e.PreAmp,
+		Amp1:   e.Amp1,
+		Amp2:   e.Amp2,
+		Amp3:   e.Amp3,
+		Amp4:   e.Amp4,
+		Amp5:   e.Amp5,
+		Amp6:   e.Amp6,
+		Amp7:   e.Amp7,
+		Amp8:   e.Amp8,
+		Amp9:   e.Amp9,
+		Amp10:  e.Amp10,
+	}
+}

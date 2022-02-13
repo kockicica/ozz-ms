@@ -127,6 +127,13 @@ func NewDataServer(config ServerConfig) (*Server, error) {
 	dispositionGroup.POST("/:id/increase", ds.increaseDispositionPlayedCount)
 	dispositionGroup.POST("/:id/decrease", ds.decreaseDispositionPlayedCount)
 
+	equalizerGroup := apiGroup.Group("/equalizers")
+	equalizerGroup.GET("", ds.getEqualizers)
+	equalizerGroup.GET("/:id", ds.getEqualizer)
+	equalizerGroup.POST("", ds.createEqualizer)
+	equalizerGroup.PUT("/:id", ds.updateEqualizer)
+	equalizerGroup.DELETE("/:id", ds.deleteEqualizer)
+
 	apiGroup.GET("/shifts", ds.getShifts)
 	apiGroup.POST("/authorize", ds.authorize)
 	apiGroup.GET("/categories", ds.getCategories)

@@ -66,3 +66,10 @@ type ScheduleSearchParams struct {
 	FromDate *string `validate:"date" query:"fromDate"`
 	ToDate   *string `validate:"date" query:"toDate"`
 }
+
+type EqualizerDTO struct {
+	ID                                                          uint
+	Name                                                        string  `validate:"required"`
+	PreAmp                                                      float32 `validate:"float"`
+	Amp1, Amp2, Amp3, Amp4, Amp5, Amp6, Amp7, Amp8, Amp9, Amp10 float32 `validate:"float"`
+}

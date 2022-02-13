@@ -64,6 +64,7 @@ func NewRepository(cfg RepositoryConfig) (*Repository, error) {
 		&model.DispositionPlayed{},
 		&model.User{},
 		&model.Schedule{},
+		&model.Equalizer{},
 	}
 
 	if err = db.AutoMigrate(models...); err != nil {
