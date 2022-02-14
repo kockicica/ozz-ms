@@ -16,8 +16,20 @@ type AudioRecordingDTO struct {
 	Name     string
 	Path     string
 	Category string
+	Client   string
+	Comment  string
+	Active   bool
 	Duration time.Duration
 	Date     time.Time
+}
+
+type PagedResults struct {
+	Count int64 `json:"count"`
+}
+
+type AudioRecordingsPagedResults struct {
+	PagedResults
+	Data []AudioRecordingDTO `json:"data"`
 }
 
 type DispositionDTO struct {
@@ -48,21 +60,26 @@ type ScheduleDTO struct {
 	Date                           time.Time
 	Duration                       time.Duration
 	Shift1, Shift2, Shift3, Shift4 int
-	Active                         bool
-	TotalPlayCount                 int
-	Dispositions                   []DispositionDTO
+	//Active                         bool
+	TotalPlayCount int
+	Dispositions   []DispositionDTO
 }
 
 type AudioRecordingsSearchParams struct {
 	Category *int    `query:"category" validate:"int"`
 	FromDate *string `validate:"date" query:"fromDate"`
 	ToDate   *string `validate:"date" query:"toDate"`
+	Active   *bool   `validate:"bool" query:"active"`
+	Name     *string `validate:"string" query:"name"`
+	Sort     *string `validate:"string" query:"sort"`
+	Skip     *int    `validate:"int" query:"skip"`
+	Count    *int    `validate:"int" query:"count"`
 }
 
 type ScheduleSearchParams struct {
 	Recording *int `validate:"int" query:"recording"`
 	//Category  *int    `validate:"int" query:"category"`
-	Active   *bool   `validate:"bool" query:"active"`
+	//Active   *bool   `validate:"bool" query:"active"`
 	FromDate *string `validate:"date" query:"fromDate"`
 	ToDate   *string `validate:"date" query:"toDate"`
 }
