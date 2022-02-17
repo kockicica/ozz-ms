@@ -23,6 +23,14 @@ type AudioRecordingDTO struct {
 	Date     time.Time
 }
 
+type AudioRecordingUpdateDTO struct {
+	Name     string `validate:"string"`
+	Category string `validate:"string"`
+	Client   string `validate:"string"`
+	Comment  string `validate:"string"`
+	Active   bool   `validate:"bool"`
+}
+
 type PagedResults struct {
 	Count int64 `json:"count"`
 }

@@ -228,3 +228,28 @@ func (s *Server) getActiveAudioRecordingsForCategory(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, res)
 }
+
+func (s *Server) updateAudioRecord(ctx echo.Context) error {
+
+	var id int
+	if err := echo.PathParamsBinder(ctx).Int("id", &id).BindError(); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	data := model.AudioRecordingUpdateDTO{}
+	if err := ctx.Bind(&data); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := ctx.Validate(&data); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	updated := model.AudioRecording{}
+	if err := s.repo.UpdateAudioRecording(id, &data, &updated); err != nil {
+		return err
+	}
+
+	return ctx.JSON(http.StatusOK, updated.Map())
+
+}

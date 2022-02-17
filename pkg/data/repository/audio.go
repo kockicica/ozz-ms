@@ -111,3 +111,35 @@ func (r Repository) ActiveAudioRecordingsForCategory(catId int, name string, dat
 
 	return nil
 }
+
+func (r Repository) UpdateAudioRecording(id int, updateData *model.AudioRecordingUpdateDTO, data interface{}) error {
+
+	fnd := model.AudioRecording{}
+
+	if err := r.db.Model(&model.AudioRecording{}).Preload("Category").First(&fnd, id).Error; err != nil {
+		return err
+	}
+
+	cat := model.Category{}
+	if err := r.db.Model(&model.Category{}).Where("Name = ?", updateData.Category).First(&cat).Error; err != nil {
+		return err
+	}
+
+	updateDict := map[string]interface{}{
+		"Name":     updateData.Name,
+		"Client":   updateData.Client,
+		"Comment":  updateData.Comment,
+		"Active":   updateData.Active,
+		"Category": cat,
+	}
+
+	if err := r.db.Model(&fnd).Updates(updateDict).Error; err != nil {
+		return err
+	}
+
+	if err := r.db.Preload("Category").First(data, id).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
