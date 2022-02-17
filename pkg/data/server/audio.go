@@ -247,7 +247,7 @@ func (s *Server) updateAudioRecord(ctx echo.Context) error {
 
 	updated := model.AudioRecording{}
 	if err := s.repo.UpdateAudioRecording(id, &data, &updated); err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, updated.Map())
