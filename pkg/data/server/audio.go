@@ -32,21 +32,17 @@ func (s *Server) searchAudioRecords(ctx echo.Context) error {
 
 	var data []model.AudioRecording
 
-	if err = s.repo.AudioRecordings(sp, &data); err != nil {
+	var count int64
+	if err = s.repo.AudioRecordings(sp, &data, &count); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	ret := []model.AudioRecordingDTO{}
-
+	ret := model.AudioRecordingsPagedResults{
+		PagedResults: model.PagedResults{count},
+		Data:         []model.AudioRecordingDTO{},
+	}
 	for _, ar := range data {
-		ret = append(ret, model.AudioRecordingDTO{
-			ID:       ar.ID,
-			Name:     ar.Name,
-			Path:     ar.Path,
-			Duration: ar.Duration,
-			Category: ar.Category.Name,
-			Date:     ar.Date,
-		})
+		ret.Data = append(ret.Data, ar.Map())
 	}
 
 	return ctx.JSON(http.StatusOK, ret)
@@ -91,6 +87,7 @@ type AudioRecordingCreateData struct {
 	Comment  *string               `form:"comment"`
 	Category *string               `form:"category" validate:"required"`
 	Duration *string               `form:"duration" validate:"required"`
+	Active   *string               `form:"active" validate:"required|bool"`
 	File     *multipart.FileHeader `form:"file" validate:"required"`
 }
 
@@ -112,8 +109,14 @@ func (s *Server) createAudioRecord(ctx echo.Context) error {
 	comment := ctx.FormValue("comment")
 	category := ctx.FormValue("category")
 	duration := ctx.FormValue("duration")
+	active := ctx.FormValue("active")
 
 	file, err := ctx.FormFile("file")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	bActive, err := strconv.ParseBool(active)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -167,6 +170,7 @@ func (s *Server) createAudioRecord(ctx echo.Context) error {
 		Duration: dur,
 		Path:     destinationFileName,
 		Date:     time.Now(),
+		Active:   bActive,
 	}
 
 	if err := s.repo.NewAudioRecording(&ar); err != nil {
@@ -174,14 +178,7 @@ func (s *Server) createAudioRecord(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return ctx.JSON(http.StatusCreated, model.AudioRecordingDTO{
-		ID:       ar.ID,
-		Name:     ar.Name,
-		Category: ar.Category.Name,
-		Duration: ar.Duration,
-		Path:     ar.Path,
-		Date:     ar.Date,
-	})
+	return ctx.JSON(http.StatusCreated, ar.Map())
 }
 
 //func (s *Server) getCategoryByName(category string) Category {
@@ -230,4 +227,29 @@ func (s *Server) getActiveAudioRecordingsForCategory(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res)
+}
+
+func (s *Server) updateAudioRecord(ctx echo.Context) error {
+
+	var id int
+	if err := echo.PathParamsBinder(ctx).Int("id", &id).BindError(); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	data := model.AudioRecordingUpdateDTO{}
+	if err := ctx.Bind(&data); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := ctx.Validate(&data); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	updated := model.AudioRecording{}
+	if err := s.repo.UpdateAudioRecording(id, &data, &updated); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, updated.Map())
+
 }

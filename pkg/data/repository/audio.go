@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"ozz-ms/pkg/data/model"
@@ -14,11 +15,10 @@ func (r Repository) NewAudioRecording(rec *model.AudioRecording) error {
 	return nil
 }
 
-func (r Repository) AudioRecordings(sp model.AudioRecordingsSearchParams, data interface{}) error {
+func (r Repository) AudioRecordings(sp model.AudioRecordingsSearchParams, data interface{}, count *int64) error {
 	tx := r.db.Preload("Category").Model(&model.AudioRecording{})
 
 	if sp.Category != nil {
-		//tx = tx.Where("CategoryID", *sp.Category)
 		tx = tx.Where(&model.AudioRecording{CategoryID: *sp.Category})
 	}
 
@@ -37,9 +37,43 @@ func (r Repository) AudioRecordings(sp model.AudioRecordingsSearchParams, data i
 		}
 		tx = tx.Where("Date <= ?", fdt)
 	}
+
+	if sp.Active != nil {
+		tx = tx.Where("Active = ?", *sp.Active)
+	}
+
+	if sp.Name != nil {
+		tx = tx.Where("Name like ?", fmt.Sprintf("%%%s%%", *sp.Name))
+	}
+
+	if sp.Sort != nil {
+		var sortClause string
+		desc := strings.HasPrefix(*sp.Sort, "-")
+		if desc {
+			sortClause = fmt.Sprintf("%s desc", (*sp.Sort)[1:])
+		} else {
+			sortClause = *sp.Sort
+		}
+		tx = tx.Order(sortClause)
+	}
+
+	tx = tx.Count(count)
+
+	if sp.Skip != nil {
+		tx = tx.Offset(*sp.Skip)
+	} else {
+		tx = tx.Offset(0)
+	}
+	if sp.Count != nil {
+		tx = tx.Limit(*sp.Count)
+	} else {
+		tx = tx.Limit(20)
+	}
+
 	if err := tx.Find(data).Error; err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -72,6 +106,38 @@ func (r Repository) ActiveAudioRecordingsForCategory(catId int, name string, dat
 	}
 
 	if err := tx.Find(data).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r Repository) UpdateAudioRecording(id int, updateData *model.AudioRecordingUpdateDTO, data interface{}) error {
+
+	fnd := model.AudioRecording{}
+
+	if err := r.db.Model(&model.AudioRecording{}).Preload("Category").First(&fnd, id).Error; err != nil {
+		return err
+	}
+
+	cat := model.Category{}
+	if err := r.db.Model(&model.Category{}).Where("Name = ?", updateData.Category).First(&cat).Error; err != nil {
+		return err
+	}
+
+	updateDict := map[string]interface{}{
+		"Name":     updateData.Name,
+		"Client":   updateData.Client,
+		"Comment":  updateData.Comment,
+		"Active":   updateData.Active,
+		"Category": cat,
+	}
+
+	if err := r.db.Model(&fnd).Updates(updateDict).Error; err != nil {
+		return err
+	}
+
+	if err := r.db.Preload("Category").First(data, id).Error; err != nil {
 		return err
 	}
 

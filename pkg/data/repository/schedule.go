@@ -20,9 +20,6 @@ func (r Repository) Schedules(sp model.ScheduleSearchParams, data interface{}) e
 	if sp.Recording != nil {
 		tx = tx.Where(&model.Schedule{RecordingID: *sp.Recording})
 	}
-	if sp.Active != nil {
-		tx = tx.Where("Active", *sp.Active)
-	}
 	if sp.FromDate != nil {
 		fdt, err := time.Parse("2006-01-02", *sp.FromDate)
 		if err != nil {
@@ -82,7 +79,6 @@ func (r Repository) SetSchedule(id int, data model.NewScheduleDTO) error {
 	sch.Shift2 = data.Shift2
 	sch.Shift3 = data.Shift3
 	sch.Shift4 = data.Shift4
-	sch.Active = data.Active
 	sch.TotalPlayCount = data.TotalPlayCount
 
 	if err := r.db.Select("*").Omit("TotalPlayCount").Updates(&sch).Error; err != nil {
@@ -115,7 +111,6 @@ func (r Repository) NewSchedule(dto model.NewScheduleDTO) (*model.Schedule, erro
 		Shift2:         dto.Shift2,
 		Shift3:         dto.Shift3,
 		Shift4:         dto.Shift4,
-		Active:         true,
 		Date:           dd,
 		TotalPlayCount: 0,
 		RecordingID:    dto.Recording,
@@ -134,6 +129,7 @@ func (r Repository) NewSchedule(dto model.NewScheduleDTO) (*model.Schedule, erro
 }
 
 func (r Repository) ActiveSchedules(data interface{}) error {
-	act := true
-	return r.Schedules(model.ScheduleSearchParams{Active: &act}, data)
+	//act := true
+	//TODO: proper filtering of schedules
+	return r.Schedules(model.ScheduleSearchParams{}, data)
 }

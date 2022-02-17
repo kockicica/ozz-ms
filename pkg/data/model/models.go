@@ -46,6 +46,7 @@ type AudioRecording struct {
 	Duration   time.Duration `validate:"required"`
 	Client     *string       `validate:"-"`
 	Comment    *string       `validate:"-"`
+	Active     bool
 	CategoryID int
 	Category   Category
 	Date       time.Time
@@ -57,6 +58,9 @@ func (r AudioRecording) Map() AudioRecordingDTO {
 		Name:     r.Name,
 		Path:     r.Path,
 		Category: r.Category.Name,
+		Client:   *r.Client,
+		Comment:  *r.Comment,
+		Active:   r.Active,
 		Duration: r.Duration,
 		Date:     r.Date,
 	}
@@ -131,7 +135,7 @@ type Schedule struct {
 	Shift3      int
 	Shift4      int
 
-	Active         bool
+	//Active         bool
 	TotalPlayCount int
 
 	Dispositions []Disposition
@@ -155,7 +159,6 @@ func (s Schedule) Map() ScheduleDTO {
 		Shift2:         s.Shift2,
 		Shift3:         s.Shift3,
 		Shift4:         s.Shift4,
-		Active:         s.Active,
 		TotalPlayCount: s.TotalPlayCount,
 		Dispositions:   []DispositionDTO{},
 	}
