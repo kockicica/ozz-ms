@@ -126,14 +126,18 @@ func (u *User) SetPassword(password string) error {
 
 type Schedule struct {
 	gorm.Model
-	RecordingID int
-	Recording   AudioRecording `gorm:"auto_preload:true"`
-	Date        time.Time
-	Duration    time.Duration
-	Shift1      int
-	Shift2      int
-	Shift3      int
-	Shift4      int
+	RecordingID  int
+	Recording    AudioRecording `gorm:"auto_preload:true"`
+	Date         time.Time
+	Duration     time.Duration
+	Shift1       int
+	Shift2       int
+	Shift3       int
+	Shift4       int
+	Shift1Played int
+	Shift2Played int
+	Shift3Played int
+	Shift4Played int
 
 	//Active         bool
 	TotalPlayCount int
@@ -159,6 +163,10 @@ func (s Schedule) Map() ScheduleDTO {
 		Shift2:         s.Shift2,
 		Shift3:         s.Shift3,
 		Shift4:         s.Shift4,
+		Shift1Played:   s.Shift1Played,
+		Shift2Played:   s.Shift2Played,
+		Shift3Played:   s.Shift3Played,
+		Shift4Played:   s.Shift4Played,
 		TotalPlayCount: s.TotalPlayCount,
 		Dispositions:   []DispositionDTO{},
 	}

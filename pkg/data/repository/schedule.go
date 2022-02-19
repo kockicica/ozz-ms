@@ -81,7 +81,8 @@ func (r Repository) SetSchedule(id int, data model.NewScheduleDTO) error {
 	sch.Shift4 = data.Shift4
 	sch.TotalPlayCount = data.TotalPlayCount
 
-	if err := r.db.Select("*").Omit("TotalPlayCount").Updates(&sch).Error; err != nil {
+	columnsToOmit := []string{"TotalPlayCount", "Shift1Played", "Shift2Played", "Shift3Played", "Shift4Played"}
+	if err := r.db.Select("*").Omit(columnsToOmit...).Updates(&sch).Error; err != nil {
 		return err
 	}
 	return nil
