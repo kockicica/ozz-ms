@@ -43,7 +43,13 @@ func (r Repository) Schedules(sp model.ScheduleSearchParams, data interface{}) e
 }
 
 func (r Repository) Schedule(id int, data interface{}) error {
-	return r.db.Preload("Recording").Preload("Recording.Category").Preload("Dispositions").First(data, id).Error
+	return r.db.
+		Preload("Recording").
+		Preload("Recording.Category").
+		Preload("Dispositions").
+		Preload("Dispositions.Recording").
+		Preload("Dispositions.Recording.Category").
+		First(data, id).Error
 }
 
 func (r Repository) DeleteSchedule(id []int) error {
