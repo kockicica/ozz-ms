@@ -41,7 +41,7 @@ type Category struct {
 
 type AudioRecording struct {
 	gorm.Model
-	Name       string        `validate:"required"`
+	Name       string        `validate:"required" gorm:"index:one_name,unique,where:deleted_at is null"`
 	Path       string        `validate:"required"`
 	Duration   time.Duration `validate:"required"`
 	Client     *string       `validate:"-"`
