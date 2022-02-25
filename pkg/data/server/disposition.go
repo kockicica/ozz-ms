@@ -83,19 +83,10 @@ func (s *Server) decreaseDispositionPlayedCount(ctx echo.Context) error {
 
 func (s *Server) createDispositions(ctx echo.Context) error {
 
-	var activeSchedules []model.Schedule
-
-	if err := s.repo.ActiveSchedules(&activeSchedules); err != nil {
-		return err
+	var cdp model.CreateDispositionParams
+	if err := ctx.Bind(&cdp); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	res := []model.ScheduleDTO{}
-	for _, activeSchedule := range activeSchedules {
-		if err := s.repo.CreateDispositions(&activeSchedule); err != nil {
-			return err
-		}
-		res = append(res, activeSchedule.Map())
-	}
-
-	return ctx.JSON(http.StatusCreated, res)
+	return ctx.JSON(http.StatusCreated, cdp)
 }

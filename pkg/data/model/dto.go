@@ -120,3 +120,8 @@ type DispositionSearchParams struct {
 	Shift int    `query:"shift" validate:"required|int"`
 	Date  string `query:"date" validate:"required|date"`
 }
+
+type CreateDispositionParams struct {
+	From string `validate:"required|date"`
+	Days int    `validate:"required|int"`
+}
