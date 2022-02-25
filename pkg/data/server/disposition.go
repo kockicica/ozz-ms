@@ -11,16 +11,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type DispositionSearchParams struct {
-	Shift int    `query:"shift" validate:"required|int"`
-	Date  string `query:"date" validate:"required|date"`
-}
-
 func (s *Server) searchDispositions(ctx echo.Context) error {
 
 	var err error
 
-	sp := DispositionSearchParams{}
+	sp := model.DispositionSearchParams{}
 
 	if err = ctx.Bind(&sp); err != nil {
 		return err
@@ -84,4 +79,23 @@ func (s *Server) decreaseDispositionPlayedCount(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, dsp.Map())
+}
+
+func (s *Server) createDispositions(ctx echo.Context) error {
+
+	var activeSchedules []model.Schedule
+
+	if err := s.repo.ActiveSchedules(&activeSchedules); err != nil {
+		return err
+	}
+
+	res := []model.ScheduleDTO{}
+	for _, activeSchedule := range activeSchedules {
+		if err := s.repo.CreateDispositions(&activeSchedule); err != nil {
+			return err
+		}
+		res = append(res, activeSchedule.Map())
+	}
+
+	return ctx.JSON(http.StatusCreated, res)
 }

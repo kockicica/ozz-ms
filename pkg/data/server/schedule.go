@@ -156,22 +156,3 @@ func (s *Server) updateSchedule(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, sch.Map())
 }
-
-func (s *Server) createDispositions(ctx echo.Context) error {
-
-	var activeSchedules []model.Schedule
-
-	if err := s.repo.ActiveSchedules(&activeSchedules); err != nil {
-		return err
-	}
-
-	res := []model.ScheduleDTO{}
-	for _, activeSchedule := range activeSchedules {
-		if err := s.repo.CreateDispositions(&activeSchedule); err != nil {
-			return err
-		}
-		res = append(res, activeSchedule.Map())
-	}
-
-	return ctx.JSON(http.StatusCreated, res)
-}

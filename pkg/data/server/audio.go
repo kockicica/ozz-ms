@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -81,21 +80,11 @@ func (s *Server) deleteAudioRecord(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-type AudioRecordingCreateData struct {
-	Name     *string               `form:"name" validate:"required"`
-	Client   *string               `form:"name"`
-	Comment  *string               `form:"comment"`
-	Category *string               `form:"category" validate:"required"`
-	Duration *string               `form:"duration" validate:"required"`
-	Active   *string               `form:"active" validate:"required|bool"`
-	File     *multipart.FileHeader `form:"file" validate:"required"`
-}
-
 func (s *Server) createAudioRecord(ctx echo.Context) error {
 
 	var err error
 
-	cd := AudioRecordingCreateData{}
+	cd := model.AudioRecordingCreateData{}
 	if err = ctx.Bind(&cd); err != nil {
 		return err
 	}
@@ -202,16 +191,11 @@ func (s *Server) getAudioRecordingPath(name, category string) string {
 	return filepath.Join(s.Config.RootPath, category, fmt.Sprintf("%s-%s%s", fileNameWoutExt, cd, ext))
 }
 
-type ActiveAudioRecordsForCategorySearchParams struct {
-	Id   int    `validate:"required|int" param:"id"`
-	Name string `query:"name"`
-}
-
 func (s *Server) getActiveAudioRecordingsForCategory(ctx echo.Context) error {
 
 	var err error
 
-	sp := ActiveAudioRecordsForCategorySearchParams{}
+	sp := model.ActiveAudioRecordsForCategorySearchParams{}
 
 	if err := ctx.Bind(&sp); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

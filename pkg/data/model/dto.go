@@ -1,6 +1,7 @@
 package model
 
 import (
+	"mime/multipart"
 	"time"
 )
 
@@ -98,4 +99,24 @@ type EqualizerDTO struct {
 	Name                                                        string  `validate:"required"`
 	PreAmp                                                      float32 `validate:"float"`
 	Amp1, Amp2, Amp3, Amp4, Amp5, Amp6, Amp7, Amp8, Amp9, Amp10 float32 `validate:"float"`
+}
+
+type AudioRecordingCreateData struct {
+	Name     *string               `form:"name" validate:"required"`
+	Client   *string               `form:"name"`
+	Comment  *string               `form:"comment"`
+	Category *string               `form:"category" validate:"required"`
+	Duration *string               `form:"duration" validate:"required"`
+	Active   *string               `form:"active" validate:"required|bool"`
+	File     *multipart.FileHeader `form:"file" validate:"required"`
+}
+
+type ActiveAudioRecordsForCategorySearchParams struct {
+	Id   int    `validate:"required|int" param:"id"`
+	Name string `query:"name"`
+}
+
+type DispositionSearchParams struct {
+	Shift int    `query:"shift" validate:"required|int"`
+	Date  string `query:"date" validate:"required|date"`
 }
