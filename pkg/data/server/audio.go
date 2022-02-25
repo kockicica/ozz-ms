@@ -162,13 +162,14 @@ func (s *Server) createAudioRecord(ctx echo.Context) error {
 		_ = os.Remove(destinationFileName)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+	_, destinationFileName = filepath.Split(destinationFileName)
 	ar := model.AudioRecording{
 		Name:     name,
 		Category: *cat,
 		Client:   &client,
 		Comment:  &comment,
 		Duration: dur,
-		Path:     destinationFileName,
+		Path:     filepath.Join(cat.Path, destinationFileName),
 		Date:     time.Now(),
 		Active:   bActive,
 	}
