@@ -41,13 +41,15 @@ var installCmd = &cobra.Command{
 			return err
 		}
 		cfg.RootPath = absRoot
+
+		// get current working dir
+		wd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+
 		if cfg.Dsn == "data.db" {
 			// without proper database url we need abs path
-			// for service
-			wd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
 			cfg.Dsn = filepath.Join(wd, "data.db")
 			cfg.Dsn = fmt.Sprintf("sqlite:///%s", cfg.Dsn)
 		}
@@ -108,16 +110,6 @@ var uninstallCmd = &cobra.Command{
 
 		serviceCfg := defaultServiceConfig()
 
-		if service.Platform() == "windows-service" {
-			serviceCfg.UserName = "Nt Authority\\Network service"
-		}
-
-		serviceCfg.Arguments = []string{
-			"--database", cfg.Dsn,
-			"--root", cfg.RootPath,
-			"--port", fmt.Sprintf("%d", cfg.Port),
-		}
-
 		createdService, err = service.New(runner, serviceCfg)
 		if err != nil {
 			return err
@@ -153,16 +145,6 @@ var startCmd = &cobra.Command{
 
 		serviceCfg := defaultServiceConfig()
 
-		if service.Platform() == "windows-service" {
-			serviceCfg.UserName = "Nt Authority\\Network service"
-		}
-
-		serviceCfg.Arguments = []string{
-			"--database", cfg.Dsn,
-			"--root", cfg.RootPath,
-			"--port", fmt.Sprintf("%d", cfg.Port),
-		}
-
 		createdService, err = service.New(runner, serviceCfg)
 		if err != nil {
 			return err
@@ -195,16 +177,6 @@ var stopCmd = &cobra.Command{
 		}
 
 		serviceCfg := defaultServiceConfig()
-
-		if service.Platform() == "windows-service" {
-			serviceCfg.UserName = "Nt Authority\\Network service"
-		}
-
-		serviceCfg.Arguments = []string{
-			"--database", cfg.Dsn,
-			"--root", cfg.RootPath,
-			"--port", fmt.Sprintf("%d", cfg.Port),
-		}
 
 		createdService, err = service.New(runner, serviceCfg)
 		if err != nil {
@@ -239,16 +211,6 @@ var restartCmd = &cobra.Command{
 
 		serviceCfg := defaultServiceConfig()
 
-		if service.Platform() == "windows-service" {
-			serviceCfg.UserName = "Nt Authority\\Network service"
-		}
-
-		serviceCfg.Arguments = []string{
-			"--database", cfg.Dsn,
-			"--root", cfg.RootPath,
-			"--port", fmt.Sprintf("%d", cfg.Port),
-		}
-
 		createdService, err = service.New(runner, serviceCfg)
 		if err != nil {
 			return err
@@ -280,16 +242,6 @@ var statusCmd = &cobra.Command{
 		}
 
 		serviceCfg := defaultServiceConfig()
-
-		if service.Platform() == "windows-service" {
-			serviceCfg.UserName = "Nt Authority\\Network service"
-		}
-
-		serviceCfg.Arguments = []string{
-			"--database", cfg.Dsn,
-			"--root", cfg.RootPath,
-			"--port", fmt.Sprintf("%d", cfg.Port),
-		}
 
 		createdService, err = service.New(runner, serviceCfg)
 		if err != nil {
