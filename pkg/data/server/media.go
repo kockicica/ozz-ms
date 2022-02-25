@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"net/http"
+	"path/filepath"
 
 	"ozz-ms/pkg/data/model"
 
@@ -36,6 +37,7 @@ func (s *Server) serveAudioFile(ctx echo.Context) error {
 	//}
 	//return ctx.Stream(200, "audio/mpeg", f)
 
-	return ctx.File(rec.Path)
+	filePath := filepath.Join(s.Config.RootPath, rec.Path)
+	return ctx.File(filePath)
 
 }
