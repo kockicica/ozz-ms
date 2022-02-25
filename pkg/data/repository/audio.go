@@ -83,7 +83,7 @@ func (r Repository) DeleteAudioRecording(id int, data interface{}) error {
 		return err
 	}
 
-	if err := r.db.Unscoped().Delete(&model.AudioRecording{}, id).Error; err != nil {
+	if err := r.db.Delete(&model.AudioRecording{}, id).Error; err != nil {
 		return err
 	}
 	return nil
