@@ -12,7 +12,12 @@ import (
 func (r Repository) Schedules(sp model.ScheduleSearchParams, data interface{}) error {
 	var err error
 
-	tx := r.db.Preload("Recording").Preload("Recording.Category").Preload("Dispositions").Preload("Dispositions.Recording").Preload("Dispositions.Recording.Category")
+	tx := r.db.
+		Preload("Recording").
+		Preload("Recording.Category")
+	//Preload("Dispositions").
+	//Preload("Dispositions.Recording").
+	//Preload("Dispositions.Recording.Category")
 
 	//if sp.Category != nil {
 	//	tx = tx.Where(&Schedule{Recording: AudioRecording{CategoryID: *sp.Category}})
@@ -46,9 +51,9 @@ func (r Repository) Schedule(id int, data interface{}) error {
 	return r.db.
 		Preload("Recording").
 		Preload("Recording.Category").
-		Preload("Dispositions").
-		Preload("Dispositions.Recording").
-		Preload("Dispositions.Recording.Category").
+		//Preload("Dispositions").
+		//Preload("Dispositions.Recording").
+		//Preload("Dispositions.Recording.Category").
 		First(data, id).Error
 }
 

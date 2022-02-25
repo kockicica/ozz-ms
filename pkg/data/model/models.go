@@ -66,38 +66,38 @@ func (r AudioRecording) Map() AudioRecordingDTO {
 	}
 }
 
-type Disposition struct {
-	gorm.Model
-	Date             time.Time `validate:"required"`
-	Shift            int       `validate:"required"`
-	RecordingID      int
-	Recording        AudioRecording
-	PlayCountNeeded  int `validate:"required|int|min:1|max:1000"`
-	PlayCountCurrent int `validate:"required|int|min:1|max:1000"`
-	ScheduleID       int
-	Schedule         Schedule
-}
-
-func (d *Disposition) Map() DispositionDTO {
-	dto := DispositionDTO{
-		AudioRecordingDTO: d.Recording.Map(),
-		Date:              d.Date,
-		Shift:             d.Shift,
-		PlayCountNeeded:   d.PlayCountNeeded,
-		PlayCountCurrent:  d.PlayCountCurrent,
-		RecordingID:       d.RecordingID,
-	}
-	dto.ID = d.ID
-	dto.Date = d.Date
-	return dto
-}
-
-type DispositionPlayed struct {
-	gorm.Model
-	DispositionID int
-	Disposition   Disposition
-	Comment       *string
-}
+//type Disposition struct {
+//	gorm.Model
+//	Date             time.Time `validate:"required"`
+//	Shift            int       `validate:"required"`
+//	RecordingID      int
+//	Recording        AudioRecording
+//	PlayCountNeeded  int `validate:"required|int|min:1|max:1000"`
+//	PlayCountCurrent int `validate:"required|int|min:1|max:1000"`
+//	ScheduleID       int
+//	Schedule         Schedule
+//}
+//
+//func (d *Disposition) Map() DispositionDTO {
+//	dto := DispositionDTO{
+//		AudioRecordingDTO: d.Recording.Map(),
+//		Date:              d.Date,
+//		Shift:             d.Shift,
+//		PlayCountNeeded:   d.PlayCountNeeded,
+//		PlayCountCurrent:  d.PlayCountCurrent,
+//		RecordingID:       d.RecordingID,
+//	}
+//	dto.ID = d.ID
+//	dto.Date = d.Date
+//	return dto
+//}
+//
+//type DispositionPlayed struct {
+//	gorm.Model
+//	DispositionID int
+//	Disposition   Disposition
+//	Comment       *string
+//}
 
 type UserLevel int
 
@@ -142,7 +142,8 @@ type Schedule struct {
 	//Active         bool
 	TotalPlayCount int
 
-	Dispositions []Disposition
+	HasDisposition bool
+	//Dispositions []Disposition
 }
 
 func (s Schedule) Map() ScheduleDTO {
@@ -168,12 +169,13 @@ func (s Schedule) Map() ScheduleDTO {
 		Shift3Played:   s.Shift3Played,
 		Shift4Played:   s.Shift4Played,
 		TotalPlayCount: s.TotalPlayCount,
-		Dispositions:   []DispositionDTO{},
+		HasDisposition: s.HasDisposition,
+		//Dispositions:   []DispositionDTO{},
 	}
 
-	for _, dsp := range s.Dispositions {
-		dto.Dispositions = append(dto.Dispositions, dsp.Map())
-	}
+	//for _, dsp := range s.Dispositions {
+	//	dto.Dispositions = append(dto.Dispositions, dsp.Map())
+	//}
 
 	return dto
 

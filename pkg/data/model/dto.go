@@ -43,11 +43,12 @@ type AudioRecordingsPagedResults struct {
 
 type DispositionDTO struct {
 	AudioRecordingDTO
-	Date             time.Time
-	Shift            int
-	PlayCountNeeded  int
-	PlayCountCurrent int
-	RecordingID      int
+	Date               time.Time
+	Shift              int
+	PlayCountNeeded    int
+	PlayCountCurrent   int
+	PlayCountRemaining int
+	ScheduleID         uint
 }
 
 type NewScheduleDTO struct {
@@ -72,7 +73,8 @@ type ScheduleDTO struct {
 	Shift1Played, Shift2Played, Shift3Played, Shift4Played int
 	//Active                         bool
 	TotalPlayCount int
-	Dispositions   []DispositionDTO
+	HasDisposition bool
+	//Dispositions   []DispositionDTO
 }
 
 type AudioRecordingsSearchParams struct {
@@ -124,4 +126,10 @@ type DispositionSearchParams struct {
 type CreateDispositionParams struct {
 	From string `validate:"required|date"`
 	Days int    `validate:"required|int"`
+}
+
+type DispositionExecuteParams struct {
+	//Recording int `validate:"required|int"`
+	Schedule int `validate:"required|int"`
+	Shift    int `validate:"required|int|min:1|max:4"`
 }
