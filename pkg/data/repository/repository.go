@@ -193,6 +193,8 @@ func initUsers(db *gorm.DB) error {
 
 func createDialector(dbUrl *url.URL) (gorm.Dialector, error) {
 
+	var err error
+
 	switch dbUrl.Scheme {
 	case "mysql":
 		if dbUrl.User == nil {
@@ -211,10 +213,19 @@ func createDialector(dbUrl *url.URL) (gorm.Dialector, error) {
 	case "sqlite":
 		fallthrough
 	default:
-		cn := filepath.Join(dbUrl.Host, dbUrl.Path)
-		absPath, err := filepath.Abs(cn)
-		if err != nil {
-			return nil, err
+		var absPath string
+		lpath := dbUrl.Path
+		if lpath[0] == '/' {
+			lpath = lpath[1:]
+		}
+		if !filepath.IsAbs(lpath) {
+			cn := filepath.Join(dbUrl.Host, lpath)
+			absPath, err = filepath.Abs(cn)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			absPath = lpath
 		}
 		dir, _ := filepath.Split(absPath)
 		if err = os.MkdirAll(dir, os.ModeDir); err != nil {
