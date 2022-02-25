@@ -127,7 +127,7 @@ func (u *User) SetPassword(password string) error {
 type Schedule struct {
 	gorm.Model
 	RecordingID  int
-	Recording    AudioRecording `gorm:"auto_preload:true"`
+	Recording    AudioRecording `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Date         time.Time
 	Duration     time.Duration
 	Shift1       int
