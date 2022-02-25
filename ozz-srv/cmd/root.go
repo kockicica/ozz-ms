@@ -35,12 +35,19 @@ import (
 var cfgFile string
 
 const (
-	serviceName        = "OZZZZZZMS"
-	serviceDisplayName = "OZZZZZZ Media Server"
-	serviceDescription = "OZZ replacement media media_index / file server"
+	serviceName        = "Ozzzzz-o-matic"
+	serviceDisplayName = "Ozzzzz-o-matic server"
+	serviceDescription = "OZZZZZ-o-matic media / data server"
+
+	DATABASE_URL_FLAG = "database"
+	ROOT_PATH_FLAG    = "root"
+	PORT_FLAG         = "port"
+	VERBOSE_FLAG      = "verbose"
 )
 
 var createdService service.Service
+var serviceConfig *service.Config
+var serverConfig server.ServerConfig
 var runner *serverWrapper
 
 type serverWrapper struct {
@@ -104,19 +111,14 @@ examples and usage of using your application. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	Version:      "version",
+	SilenceUsage: true,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		cfg := server.ServerConfig{
-			Dsn: "data.db",
-			//Dsn:      "mysql://root:pass@localhost:3306/ozz?charset=utf8mb4&parseTime=True&loc=Local",
-			Port:     27000,
-			RootPath: "./media",
-			Verbose:  true,
-		}
-
-		srv, err := server.NewDataServer(cfg)
+		serverConfig = createServerConfig()
+		srv, err := server.NewDataServer(serverConfig)
 
 		if err != nil {
 			return err
@@ -125,12 +127,8 @@ to quickly create a Cobra application.`,
 		runner := &serverWrapper{
 			server: srv,
 		}
-		createdService, err = service.New(runner, &service.Config{
-			Name:        serviceName,
-			DisplayName: serviceDisplayName,
-			Description: serviceDescription,
-			Arguments:   []string{},
-		})
+		serviceConfig = defaultServiceConfig()
+		createdService, err = service.New(runner, serviceConfig)
 		if err != nil {
 			return err
 		}
@@ -160,10 +158,16 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ozz-srv.yaml)")
+	rootCmd.PersistentFlags().StringP(DATABASE_URL_FLAG, "d", "data.db", "database connection string")
+	rootCmd.PersistentFlags().StringP(ROOT_PATH_FLAG, "r", "./media", "media storage root path")
+	rootCmd.PersistentFlags().IntP(PORT_FLAG, "p", 27000, "port server will listen at")
+	rootCmd.PersistentFlags().Bool(VERBOSE_FLAG, false, "set more detailed logging")
+
+	viper.BindPFlags(rootCmd.PersistentFlags())
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -190,4 +194,29 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func createServerConfig() server.ServerConfig {
+	dbUrl := viper.GetString(DATABASE_URL_FLAG)
+	rootPath := viper.GetString(ROOT_PATH_FLAG)
+	port := viper.GetInt(PORT_FLAG)
+	verbose := viper.GetBool(VERBOSE_FLAG)
+	cfg := server.ServerConfig{
+		Dsn: dbUrl,
+		//Dsn:      "mysql://root:pass@localhost:3306/ozz?charset=utf8mb4&parseTime=True&loc=Local",
+		Port:     port,
+		RootPath: rootPath,
+		Verbose:  verbose,
+	}
+	return cfg
+}
+
+func defaultServiceConfig() *service.Config {
+	cfg := service.Config{
+		Name:        serviceName,
+		DisplayName: serviceDisplayName,
+		Description: serviceDescription,
+		Arguments:   []string{},
+	}
+	return &cfg
 }
