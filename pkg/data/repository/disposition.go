@@ -85,7 +85,7 @@ func (r Repository) DispositionForShiftAndData(shift int, date time.Time) ([]mod
 
 	tx := r.db.Preload("Recording").
 		Preload("Recording.Category").
-		Where("Date = ?", date)
+		Where("Date = ? and Has_Disposition = true", date)
 	if err := tx.Find(&schedules).Error; err != nil {
 		return nil, err
 	}
