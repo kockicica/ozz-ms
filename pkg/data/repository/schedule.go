@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"time"
 
 	"ozz-ms/pkg/data/model"
@@ -96,10 +97,26 @@ func (r Repository) NewSchedule(dto model.NewScheduleDTO) (*model.Schedule, erro
 		return nil, err
 	}
 
-	// find
+	// find recording
 	rec := model.AudioRecording{}
 	if err := r.db.First(&rec, dto.Recording).Error; err != nil {
 		return nil, err
+	}
+
+	// do we have a schedule for same date and same audio recording?
+	existingSchedule := model.Schedule{}
+	if err = r.db.
+		Preload("Recording").
+		Preload("Recording.Category").
+		Model(&model.Schedule{}).
+		Where("Date = ? and Recording_id = ?", dd, rec.ID).
+		First(&existingSchedule).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+
+	if err == nil {
+		// no error, meaning yes, schedule exists
+		return &existingSchedule, nil
 	}
 
 	sch := model.Schedule{
