@@ -43,7 +43,7 @@ for platform in "${platforms[@]}"; do
   -X ozz-ms/ozz-srv/cmd.REVISION=$REVISION \
   -X ozz-ms/ozz-srv/cmd.BRANCH=$BRANCH \
   " \
-  -o ./$ARTIFACTS_DIR/$output_name $package_name
+  -o ./$ARTIFACTS_DIR/$output_name $package
   if [ $? -ne 0 ]; then
     echo 'Error occured'
     exit 1
