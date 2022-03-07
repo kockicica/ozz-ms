@@ -15,13 +15,6 @@ func (r Repository) Schedules(sp model.ScheduleSearchParams, data interface{}) e
 	tx := r.db.
 		Preload("Recording").
 		Preload("Recording.Category")
-	//Preload("Dispositions").
-	//Preload("Dispositions.Recording").
-	//Preload("Dispositions.Recording.Category")
-
-	//if sp.Category != nil {
-	//	tx = tx.Where(&Schedule{Recording: AudioRecording{CategoryID: *sp.Category}})
-	//}
 	if sp.Recording != nil {
 		tx = tx.Where(&model.Schedule{RecordingID: *sp.Recording})
 	}
@@ -51,9 +44,6 @@ func (r Repository) Schedule(id int, data interface{}) error {
 	return r.db.
 		Preload("Recording").
 		Preload("Recording.Category").
-		//Preload("Dispositions").
-		//Preload("Dispositions.Recording").
-		//Preload("Dispositions.Recording.Category").
 		First(data, id).Error
 }
 
@@ -100,11 +90,6 @@ func (r Repository) SetSchedule(id int, data model.NewScheduleDTO) error {
 }
 
 func (r Repository) NewSchedule(dto model.NewScheduleDTO) (*model.Schedule, error) {
-
-	//d, err := time.ParseDuration(dto.Duration)
-	//if err != nil {
-	//	return nil, err
-	//}
 
 	dd, err := time.Parse("2006-01-02", dto.Date)
 	if err != nil {
