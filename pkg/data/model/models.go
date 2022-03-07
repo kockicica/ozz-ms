@@ -165,3 +165,11 @@ func (e Equalizer) Map() EqualizerDTO {
 		Amp10:  e.Amp10,
 	}
 }
+
+type EmitLog struct {
+	gorm.Model
+	Schedule   Schedule `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ScheduleID int
+	Time       time.Time
+	Shift      int
+}

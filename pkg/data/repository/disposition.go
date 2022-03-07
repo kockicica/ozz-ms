@@ -221,5 +221,16 @@ func (r Repository) MarkDispositionExecute(data model.DispositionExecuteParams) 
 		return err
 	}
 
+	// create emit log
+	emitLog := model.EmitLog{
+		Schedule: schedule,
+		Time:     time.Now(),
+		Shift:    data.Shift,
+	}
+
+	if err := r.db.Create(&emitLog).Error; err != nil {
+		return err
+	}
+
 	return nil
 }
