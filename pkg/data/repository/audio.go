@@ -143,3 +143,37 @@ func (r Repository) UpdateAudioRecording(id int, updateData *model.AudioRecordin
 
 	return nil
 }
+
+func (r Repository) GetAudioLog(sp model.AudioRecordingLogSearchParams, data interface{}) error {
+
+	tx := r.db.
+		Joins("Schedule").
+		Preload("Schedule.Recording").
+		Preload("Schedule.Recording.Category").
+		Model(&model.EmitLog{}).
+		Where("Schedule.Recording_ID = ?", sp.Recording)
+
+	if sp.From != nil {
+		dateFrom, err := time.Parse("2006-01-02", *sp.From)
+		if err != nil {
+			return err
+		}
+		tx = tx.Where("Time >= ?", dateFrom)
+	}
+
+	if sp.To != nil {
+		dateTo, err := time.Parse("2006-01-02", *sp.To)
+		if err != nil {
+			return err
+		}
+		tx = tx.Where("Time <= ?", dateTo)
+	}
+
+	tx = tx.Order("Time")
+
+	if err := tx.Find(data).Error; err != nil {
+		return err
+	}
+
+	return nil
+}

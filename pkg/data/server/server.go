@@ -83,6 +83,7 @@ func NewDataServer(config ServerConfig) (*Server, error) {
 	audioGroup.PUT("/:id", ds.updateAudioRecord)
 	audioGroup.DELETE("/:id", ds.deleteAudioRecord)
 	audioGroup.GET("/media/:id", ds.serveAudioFile)
+	audioGroup.GET("/log", ds.audioRecordingLog)
 	//audioGroup.GET("/active/:id", ds.getActiveAudioRecordingsForCategory)
 
 	scheduleGroup := apiGroup.Group("/schedules")

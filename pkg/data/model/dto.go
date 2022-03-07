@@ -133,3 +133,18 @@ type DispositionExecuteParams struct {
 	Schedule int `validate:"required|int"`
 	Shift    int `validate:"required|int|min:1|max:4"`
 }
+
+type AudioRecordingLogSearchParams struct {
+	Recording int     `validate:"required|int" query:"recording"`
+	From      *string `validate:"date" query:"from"`
+	To        *string `validate:"date" query:"to"`
+}
+
+type AudioRecordingLog struct {
+	Name         string
+	Category     string
+	Duration     time.Duration
+	Time         time.Time
+	Shift        int
+	ScheduleDate time.Time
+}
