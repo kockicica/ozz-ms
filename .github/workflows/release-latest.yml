@@ -34,6 +34,11 @@ jobs:
 #        env:
 #          CI_COMMIT_TAG: ${{steps.tagger.outputs.tag}}
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: binaries
+
       - name: Release
         uses: marvinpinto/action-automatic-releases@latest
         with:
