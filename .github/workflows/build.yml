@@ -1,9 +1,6 @@
-name: Release executables
-
+name: Build artifacts
 on:
-  push:
-    tags:
-      - 'v*.*.*'
+  workflow_call
 
 jobs:
   build:
@@ -30,10 +27,3 @@ jobs:
         run: ./build.sh ozz-ms/ozz-srv
         env:
           CI_COMMIT_TAG: ${{steps.tagger.outputs.tag}}
-
-      - name: Release
-        uses: marvinpinto/action-automatic-releases@latest
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          files: ./artifacts/**
-          automatic_release_tag: "latest"
