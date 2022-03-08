@@ -22,6 +22,7 @@ jobs:
         continue-on-error: true
         with:
           commit-ish: 'HEAD'
+          include: 'v*'
 
       - name: Build
         run: ./build.sh ozz-ms/ozz-srv
