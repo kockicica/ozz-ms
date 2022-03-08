@@ -38,6 +38,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: binaries
+          path: ./artifacts
 
       - name: Release
         uses: marvinpinto/action-automatic-releases@latest
