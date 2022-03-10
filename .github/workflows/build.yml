@@ -16,18 +16,20 @@ jobs:
       - name: Chmod
         run: chmod +x ./build.sh
 
-      - name: Find tag
-        id: tagger
-        uses: jimschubert/query-tag-action@v1
-        continue-on-error: true
-        with:
-          commit-ish: 'HEAD'
-          include: 'v*'
+#      - name: Find tag
+#        id: tagger
+#        uses: jimschubert/query-tag-action@v1
+#        continue-on-error: true
+#        with:
+#          commit-ish: 'HEAD'
+#          include: 'v*'
+      - name: Get tag
+        uses: little-core-labs/get-git-tag@v3.0.1
 
       - name: Build
         run: ./build.sh ozz-ms/ozz-srv
         env:
-          CI_COMMIT_TAG: ${{steps.tagger.outputs.tag}}
+          CI_COMMIT_TAG: $GIT_TAG_NAME
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
